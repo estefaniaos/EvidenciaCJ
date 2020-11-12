@@ -61,6 +61,16 @@ public class Main {
                     doc.addDoctor(nombre, apellido, especialidad);
                     System.out.println("El doctor " + nombre + " " + apellido + " fue creado exitosamente");
                     break;
+                case "b":
+                    Patient pat = new Patient();
+                    System.out.println("Ingresa el nombre del paciente");
+                    nombre = write.next();
+                    System.out.println("Ingresa el apellido del paciente");
+                    apellido = write.next();
+
+                    pat.addPatient(nombre, apellido);
+                    System.out.println("El paciente " + nombre + " " + apellido + " fue creado exitosamente");
+                    break;
                 case "d":
                     System.out.println("Gracias por utilizar el sistema, ¡adiós!");
                     actMenu = false;

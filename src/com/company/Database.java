@@ -7,6 +7,7 @@ import java.util.HashMap;
 public class Database {
     HashMap<String, String[]> doctors = new HashMap<>();
     HashMap<String, String[]> pacientes = new HashMap<>();
+    HashMap<String, String[]> selectedMap = new HashMap<>();
     String filename;
     BufferedWriter bufferedWriter = null;
 
@@ -23,18 +24,19 @@ public class Database {
 
         if(type == doctor){
             this.filename = "db/doctors.txt";
-            newId = load(filename);
-
-            if(newId.equals("")){
-                newId = "0";
-            }
-
-            auxId = Integer.parseInt(newId);
-            auxId++;
-            newId = String.valueOf(auxId);
         }else{
-            newId = "";
+            this.filename = "db/patients.txt";
         }
+
+        newId = load(this.filename);
+
+        if(newId.equals("")){
+            newId = "0";
+        }
+
+        auxId = Integer.parseInt(newId);
+        auxId++;
+        newId = String.valueOf(auxId);
 
         return newId;
     }
@@ -42,7 +44,10 @@ public class Database {
     public void addItem(int type, String id, String[] info){
         if(type == doctor){
             doctors.put(id, info);
-            save();
+            save(doctor);
+        }else{
+            pacientes.put(id, info);
+            save(paciente);
         }
     }
 
@@ -51,7 +56,7 @@ public class Database {
         String lastId = "";
 
         try {
-            bufferedReader = new BufferedReader(new FileReader(filename));
+            bufferedReader = new BufferedReader(new FileReader(this.filename));
 
             String line, id, name, lastName, specialty;
             String[] info = new String[3];
@@ -92,12 +97,18 @@ public class Database {
         return lastId;
     }
 
-    public void save(){
+    public void save(int type){
 
         try {
             this.bufferedWriter = new BufferedWriter(new FileWriter(this.filename));
 
-            this.doctors.entrySet().forEach(entry->{
+            if(type == doctor){
+                selectedMap = this.doctors;
+            }else{
+                selectedMap = this.pacientes;
+            }
+
+            selectedMap.entrySet().forEach(entry->{
                 String line;
                 line = entry.getKey() + ",";
                 for (int i = 0; i < entry.getValue().length; i++) {
@@ -106,7 +117,7 @@ public class Database {
                         line = line + ",";
                     }
                 }
-                System.out.println(line);
+
                 try {
                     this.bufferedWriter.write(line + "\n");
                 } catch (IOException e) {
