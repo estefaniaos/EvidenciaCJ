@@ -13,13 +13,12 @@ public class Patient {
         this.apellido = "";
     }
 
-    public void addPatient(String name, String lastName){
+    public void addPatient(String name, String lastName, Database x){
         String[] info = new String[2];
 
         this.nombre = name;
         this.apellido = lastName;
 
-        Database x = new Database();
         this.id = (x.getItemId(patient));
 
         info[0] = this.nombre;
@@ -27,6 +26,11 @@ public class Patient {
 
         x.addItem(patient, this.id, info);
 
+    }
 
+    public void setPatient(String id, String name, String lastName){
+        this.id = id;
+        this.nombre = name;
+        this.apellido = lastName;
     }
 }

@@ -1,5 +1,6 @@
 package com.company;
 
+import javax.print.Doc;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,7 +8,7 @@ import java.util.HashMap;
 public class Database {
     HashMap<String, String[]> doctors = new HashMap<>();
     HashMap<String, String[]> pacientes = new HashMap<>();
-    HashMap<String, String[]> selectedMap = new HashMap<>();
+
     String filename;
     BufferedWriter bufferedWriter = null;
 
@@ -24,17 +25,12 @@ public class Database {
 
         if(type == doctor){
             this.filename = "db/doctors.txt";
+            auxId = doctors.size();
         }else{
             this.filename = "db/patients.txt";
+            auxId = pacientes.size();
         }
 
-        newId = load(this.filename);
-
-        if(newId.equals("")){
-            newId = "0";
-        }
-
-        auxId = Integer.parseInt(newId);
         auxId++;
         newId = String.valueOf(auxId);
 
@@ -42,7 +38,7 @@ public class Database {
     }
 
     public void addItem(int type, String id, String[] info){
-        if(type == doctor){
+        if (type == doctor){
             doctors.put(id, info);
             save(doctor);
         }else{
@@ -51,36 +47,43 @@ public class Database {
         }
     }
 
-    public String load(String filename){
+    public void load(int type){
+
+        if(type == doctor){
+            this.filename = "db/doctors.txt";
+        }else{
+            this.filename = "db/patients.txt";
+        }
+
         BufferedReader bufferedReader = null;
-        String lastId = "";
 
         try {
             bufferedReader = new BufferedReader(new FileReader(this.filename));
 
-            String line, id, name, lastName, specialty;
-            String[] info = new String[3];
+            String line, id, name, lastName, specialty = "";
+
 
             while ((line = bufferedReader.readLine()) != null) {
 
                 String[] res = line.split("[,]", 0);
-                id = res[0];
-                name = res[1];
-                lastName = res[2];
-                specialty = res[3];
 
-                info[0] = name;
-                info[1] = lastName;
+                if(res.length > 1){
+                    id = res[0];
+                    name = res[1];
+                    lastName = res[2];
 
-                if(filename == "db/doctors.txt"){
-                    info[2] = specialty;
-                    doctors.put(id, info);
-                    lastId = id;
-                }else{
-                    pacientes.put(id, info);
-                    lastId = id;
+                    if(res.length > 3){
+                        specialty = res[3];
+                    }
+
+                    if(this.filename == "db/doctors.txt"){
+                        String[] info = {name, lastName, specialty};
+                        doctors.put(id, info);
+                    }else{
+                        String[] info = {name, lastName};
+                        pacientes.put(id, info);
+                    }
                 }
-
             }
         } catch(IOException e) {
             System.out.println("IOException catched while reading: " + e.getMessage());
@@ -94,7 +97,6 @@ public class Database {
             }
         }
 
-        return lastId;
     }
 
     public void save(int type){
@@ -103,27 +105,42 @@ public class Database {
             this.bufferedWriter = new BufferedWriter(new FileWriter(this.filename));
 
             if(type == doctor){
-                selectedMap = this.doctors;
+                doctors.entrySet().forEach(entry->{
+                    String line;
+                    line = entry.getKey() + ",";
+                    for (int i = 0; i < entry.getValue().length; i++) {
+                        line = line + entry.getValue()[i];
+                        if(i != entry.getValue().length-1){
+                            line = line + ",";
+                        }
+                    }
+
+                    try {
+                        this.bufferedWriter.write(line + "\n");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
             }else{
-                selectedMap = this.pacientes;
+                pacientes.entrySet().forEach(entry->{
+                    String line;
+                    line = entry.getKey() + ",";
+                    for (int i = 0; i < entry.getValue().length; i++) {
+                        line = line + entry.getValue()[i];
+                        if(i != entry.getValue().length-1){
+                            line = line + ",";
+                        }
+                    }
+
+                    try {
+                        this.bufferedWriter.write(line + "\n");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
             }
 
-            selectedMap.entrySet().forEach(entry->{
-                String line;
-                line = entry.getKey() + ",";
-                for (int i = 0; i < entry.getValue().length; i++) {
-                    line = line + entry.getValue()[i];
-                    if(i != entry.getValue().length-1){
-                        line = line + ",";
-                    }
-                }
 
-                try {
-                    this.bufferedWriter.write(line + "\n");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
         } catch(IOException e) {
             System.out.println("IOException catched while reading: " + e.getMessage());
         } finally {
@@ -135,5 +152,73 @@ public class Database {
                 System.out.println("IOException catched while closing: " + e.getMessage());
             }
         }
+    }
+
+    public int list(int type){
+
+        int cont = 0;
+
+        if(type == doctor){
+            doctors.entrySet().forEach(entry-> {
+                String line;
+                line = entry.getKey() + ") ";
+                for (int i = 0; i < entry.getValue().length; i++) {
+                    line = line + entry.getValue()[i] + " ";
+                        if(i == entry.getValue().length-2){
+                            line = line + " - ";
+                        }
+                }
+
+                System.out.println(line);
+            });
+            cont = doctors.size();
+        }else{
+            pacientes.entrySet().forEach(entry-> {
+                String line;
+                line = entry.getKey() + ")";
+                for (int i = 0; i < entry.getValue().length; i++) {
+                    line = line + entry.getValue()[i] + " ";
+                }
+
+                System.out.println(line);
+            });
+            cont = pacientes.size();
+        }
+
+        return cont;
+
+    }
+
+    public Doctor getDoctor(int auxKey){
+        String key, name, lastName, specialty;
+        String docInfo[] = new String[3];
+
+        key = String.valueOf(auxKey);
+        docInfo = doctors.get(key);
+
+        name = docInfo[0];
+        lastName = docInfo[1];
+        specialty = docInfo[2];
+
+        Doctor x = new Doctor();
+        x.setDoctor(key, name, lastName, specialty);
+
+        return x;
+    }
+
+    public Patient getPatient(int auxKey){
+        String key, name, lastName;
+        String patInfo[] = new String[2];
+
+        key = String.valueOf(auxKey);
+        patInfo = pacientes.get(key);
+
+        name = patInfo[0];
+        lastName = patInfo[1];
+
+        Patient x = new Patient();
+        x.setPatient(key, name, lastName);
+
+        return x;
     }
 }
