@@ -9,7 +9,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner write = new Scanner(System.in);
 
-        showMenu(write);
+        login(write);
 
     }
 
@@ -89,7 +89,7 @@ public class Main {
                     boolean isValid = false;
                     String fecha, hora;
 
-                    if(lengthDocs > 1){
+                    if(lengthDocs > 0){
 
                         while (!isValid){
                             choiceDoc = write.nextInt();
@@ -100,7 +100,7 @@ public class Main {
                             }
                         }
                     }else{
-                        System.out.println("No hay suficientes doctorws registrados para agendar una cita.");
+                        System.out.println("No hay suficientes doctores registrados para agendar una cita.");
                         break;
                     }
 
@@ -109,7 +109,7 @@ public class Main {
                     isValid = false;
                     lengthPats = db.list(patient);
 
-                    if(lengthPats > 1){
+                    if(lengthPats > 0){
 
                         while (!isValid){
                             choicePat = write.nextInt();
